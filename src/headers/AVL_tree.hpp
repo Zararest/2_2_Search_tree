@@ -72,6 +72,16 @@ public:
         return node_error;
     }
 
+    int get_left_tree_size() const{
+
+        return size_of_left_tree;
+    }
+
+    int get_right_tree_size() const{
+
+        return size_of_right_tree;
+    }
+
     T_key get_key() const{
 
         return node_key;
@@ -116,33 +126,36 @@ public:
 
     void print_node(std::ostream& outp_stream){
         
-		outp_stream << node_key << "[" << depth_of_left << ", " << depth_of_right << "]" << std::endl;
+		outp_stream << node_key << " [" << depth_of_left << ", " << depth_of_right << "]" << std::endl;
 	}
 };
 
 
 class AVL_tree{
 
-private:
+protected:
 
     Node* root;
 
     long number_of_rotations;
 
     void balance_tree(Node* cur_tree_root);
+
+    Node* find_elems_node(T_key elem) const;
+    
 public:
 
     AVL_tree();
 
-    ~AVL_tree(); //тут циклически освобождается память
+    ~AVL_tree();
 
-    long add_new_elem(T_key new_key);  //возвращает количество поворотов
+    long add_new_elem(T_key new_key);
 
-    T_key get_last_elem(int degree_of_last_elem);
+    bool find_elem(T_key elem) const;
 
-    int number_of_elems_less_than(int cur_elem);
+    T_key get_last_elem(int degree_of_last_elem) const; 
 
-    void dump(std::ostream& outp_stream = std::cout);
-
-    bool check_context(std::ostream& outp_stream = std::cout) const;
+    int number_of_elems_less_than(int cur_elem) const;
+    
+    void dump(std::ostream& outp_stream = std::cout) const;    
 };

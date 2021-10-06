@@ -168,7 +168,6 @@ void Node::left_rotation(){
 
 void Node::right_rotation(){
 
-    //printf("\tright rotation\n");
     Node* cur_prev = prev;
     Node* cur_right = right;
 
@@ -265,32 +264,34 @@ AVL_tree::~AVL_tree(){
 
     Node* cur_node = root;
 
-    while ((cur_node->go_left() != nullptr) || (cur_node->go_left() != nullptr) || (cur_node->go_back() != nullptr)){
+    if (root != nullptr){
 
-        if (cur_node->go_left() != nullptr){
+        while ((cur_node->go_left() != nullptr) || (cur_node->go_right() != nullptr) || (cur_node->go_back() != nullptr)){
 
-            cur_node = cur_node->go_left();
-        } else{
+            if (cur_node->go_left() != nullptr){
 
-            if (cur_node->go_right() != nullptr){
-
-                cur_node = cur_node->go_right();
+                cur_node = cur_node->go_left();
             } else{
 
-                if (cur_node->go_back()->go_right() == cur_node){
+                if (cur_node->go_right() != nullptr){
 
-                    cur_node = cur_node->go_back();
-                    cur_node->delete_right();
+                    cur_node = cur_node->go_right();
                 } else{
-                    
-                    cur_node = cur_node->go_back();
-                    cur_node->delete_left();
+
+                    if (cur_node->go_back()->go_right() == cur_node){
+
+                        cur_node = cur_node->go_back();
+                        cur_node->delete_right();
+                    } else{
+                        
+                        cur_node = cur_node->go_back();
+                        cur_node->delete_left();
+                    }
                 }
             }
         }
+        root->~Node();
     }
-
-    root->~Node();
 }
 
 long AVL_tree::add_new_elem(T_key new_key){
@@ -298,7 +299,6 @@ long AVL_tree::add_new_elem(T_key new_key){
     if (root == nullptr){
 
         root = new Node(new_key);
-
         return 0;
     }
 
@@ -335,17 +335,14 @@ long AVL_tree::add_new_elem(T_key new_key){
                 cur_node = cur_node->go_right();
             }
         }
-
         assert(cur_node != nullptr);
     }
 
     if (root->go_back() != nullptr){
 
         root = root->go_back();
-
         assert(root->go_back() == nullptr);
     }
-
     assert(root->check_balance() == true);   
 
     return number_of_rotations - number_of_rot_before;
@@ -400,62 +397,113 @@ void print_tree(std::ostream& outp_stream, Node* cur_node){
     }
 }
 
-void AVL_tree::dump(std::ostream& outp_stream){
+void AVL_tree::dump(std::ostream& outp_stream) const{
 
     outp_stream << "root: ";
     root->print_node(outp_stream);
-    outp_stream << '\n';
+    outp_stream << "number of rotations: " << number_of_rotations << '\n';
     print_tree(outp_stream, root);
 }
 
-bool check_tree(std::ostream& outp_stream, Node* cur_root){
+Node* AVL_tree::find_elems_node(T_key elem) const{
 
-    if (cur_root == nullptr){
-        
-        return true;
+    Node* cur_node = root;
+
+    while (cur_node != nullptr){
+
+        if (cur_node->get_key() == elem){
+
+            return cur_node;
+        }
+
+        if (elem < cur_node->get_key()){
+
+            cur_node = cur_node->go_left();
+        } else{
+
+            cur_node = cur_node->go_right();
+        }
     }
 
-    if (cur_root->check_data() == false){
+    return nullptr;
+}
 
-        outp_stream << "error: [";
+bool AVL_tree::find_elem(T_key elem) const{
+    
+    if (find_elems_node(elem) != nullptr){
 
-        switch (cur_root->get_error()){
-
-        case left_depth:
-            outp_stream << "left depth corrupted";
-            break;
-        
-        case left_size:
-            outp_stream << "left tree height corrupted";
-            break;
-
-        case right_depth:
-            outp_stream << "right depth corrupted";
-            break;
-
-        case right_size:
-            outp_stream << "right tree height corrupted";
-            break;
-        } 
-
-        outp_stream << "] node: ";
-
-        cur_root->print_node(outp_stream);
-
-        return false;
+        return true;
     } else{
 
-        return (check_tree(outp_stream, cur_root->go_left()) && (check_tree(outp_stream, cur_root->go_right())));
-    }   
-}
-
-bool AVL_tree::check_context(std::ostream& outp_stream) const{
-
-    if (root->check_balance() == false){
-
-        outp_stream << "Tree is unbalanced\n";
         return false;
     }
-    return check_tree(outp_stream, root);
 }
 
+int AVL_tree::number_of_elems_less_than(int cur_elem) const{
+
+    Node* cur_node = root;
+    int elems_less_then = 0;
+
+    while (cur_node != nullptr){
+
+        if (cur_node->get_key() == cur_elem){
+
+            return elems_less_then + cur_node->get_left_tree_size();
+        }
+
+        if (cur_elem < cur_node->get_key()){
+
+            cur_node = cur_node->go_left();
+        } else{
+
+            elems_less_then += 1 + cur_node->get_left_tree_size();
+            cur_node = cur_node->go_right();
+        }
+    }
+
+    return elems_less_then;
+}
+
+T_key AVL_tree::get_last_elem(int degree_of_last_elem) const{
+
+    bool elem_has_found = false;
+    int elems_less_than_cur_node = 0;
+    Node* cur_node = root;
+
+    if (root == nullptr){
+
+        return -1;
+    }
+
+    if (degree_of_last_elem > root->get_left_tree_size() + root->get_right_tree_size() + 1){
+
+        return -1;
+    }
+
+    while (!elem_has_found){
+
+        if (cur_node == nullptr){
+
+            return -1;
+        }
+
+        if (degree_of_last_elem - 1 == elems_less_than_cur_node + cur_node->get_left_tree_size()){
+
+            elem_has_found = true;
+        } else{
+
+            if (degree_of_last_elem - 1 < elems_less_than_cur_node + cur_node->get_left_tree_size()){
+
+                cur_node = cur_node->go_left();
+                assert(cur_node != nullptr);
+            } else{
+
+                elems_less_than_cur_node += 1 + cur_node->get_left_tree_size();
+                cur_node = cur_node->go_right();
+                assert(cur_node != nullptr);
+            }
+        }
+    }
+    
+    return cur_node->get_key();
+}

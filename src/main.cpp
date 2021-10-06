@@ -4,17 +4,29 @@ int main(){
 
     int number_of_itter = 0;
     T_key elem = 0;
+    char key = '!';
     AVL_tree new_tree;
 
     std::cin >> number_of_itter;
 
     for (int i = 0; i < number_of_itter; i++){
 
+        std::cin >> key;
         std::cin >> elem;
         
-        new_tree.add_new_elem(elem);
-    }
+        switch (key){
 
-    new_tree.dump();
-    std::cout << "tree check: " << new_tree.check_context() << '\n';
+        case 'k':
+            new_tree.add_new_elem(elem);
+            break;
+        case 'm':
+            std::cout << new_tree.get_last_elem(elem) << ' ';
+            break;
+        
+        case 'n':
+            std::cout << new_tree.number_of_elems_less_than(elem) << ' ';
+            break;
+        }
+    }
+    std::cout << '\n';
 }

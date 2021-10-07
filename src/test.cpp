@@ -139,8 +139,10 @@ enum Test_errors{
     context_error = 1,
     balance_error = 2,
     data_error = 3,
-    number_off_elems_error = 4,
-    connection_error = 5
+    number_of_elems_error = 4,
+    connection_error = 5,
+    get_last_elem_error = 6,
+    min_number_error = 7
 };
 
 BOOST_AUTO_TEST_SUITE(AVL_tree_tests)
@@ -186,7 +188,7 @@ BOOST_AUTO_TEST_CASE(First){
 
     if (number_of_elems != file_size){
 
-        error = set_byte(error, number_off_elems_error);
+        error = set_byte(error, number_of_elems_error);
     }
 
     if (test_tree.check_connections() == false){
@@ -238,7 +240,7 @@ BOOST_AUTO_TEST_CASE(Second){
 
     if (number_of_elems != file_size){
 
-        error = set_byte(error, number_off_elems_error);
+        error = set_byte(error, number_of_elems_error);
     }
 
     if (test_tree.check_connections() == false){
@@ -290,7 +292,7 @@ BOOST_AUTO_TEST_CASE(Third){
 
     if (number_of_elems != file_size){
 
-        error = set_byte(error, number_off_elems_error);
+        error = set_byte(error, number_of_elems_error);
     }
 
     if (test_tree.check_connections() == false){
@@ -342,7 +344,111 @@ BOOST_AUTO_TEST_CASE(Fourth){
 
     if (number_of_elems != file_size){
 
-        error = set_byte(error, number_off_elems_error);
+        error = set_byte(error, number_of_elems_error);
+    }
+
+    if (test_tree.check_connections() == false){
+        
+        error = set_byte(error, connection_error);
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(Fifth){
+
+    int file_size = 500000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ofstream outp_file("../bin/fifth_out.txt", std::ios_base::trunc);
+    std::ifstream input_file("../bin/fifth_test.txt");
+    T_key elem = 0, prev_elem = 0;
+    int number_of_elems = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    if (test_tree.check_context(outp_file) == false){
+
+        error = set_byte(error, context_error);
+    }
+
+    number_of_elems = test_tree.test_dump(outp_file);
+    outp_file.close();
+    input_file.close();
+
+    input_file.open("fifth_out.txt", std::ios_base::in);
+    input_file >> prev_elem;
+
+    for (int i = 0; i < number_of_elems - 1; i++){
+
+        input_file >> elem;
+
+        if (prev_elem >= elem){
+
+            error = set_byte(error, data_error);
+        }
+    }
+
+    if (number_of_elems != file_size){
+
+        error = set_byte(error, number_of_elems_error);
+    }
+
+    if (test_tree.check_connections() == false){
+        
+        error = set_byte(error, connection_error);
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(Almost_eternity){
+
+    int file_size = 5000000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ofstream outp_file("../bin/eternity_out.txt", std::ios_base::trunc);
+    std::ifstream input_file("../bin/eternity_test.txt");
+    T_key elem = 0, prev_elem = 0;
+    int number_of_elems = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    if (test_tree.check_context(outp_file) == false){
+
+        error = set_byte(error, context_error);
+    }
+
+    number_of_elems = test_tree.test_dump(outp_file);
+    outp_file.close();
+    input_file.close();
+
+    input_file.open("eternity_out.txt", std::ios_base::in);
+    input_file >> prev_elem;
+
+    for (int i = 0; i < number_of_elems - 1; i++){
+
+        input_file >> elem;
+
+        if (prev_elem >= elem){
+
+            error = set_byte(error, data_error);
+        }
+    }
+
+    if (number_of_elems != file_size){
+
+        error = set_byte(error, number_of_elems_error);
     }
 
     if (test_tree.check_connections() == false){
@@ -357,5 +463,145 @@ BOOST_AUTO_TEST_SUITE_END()
 
 
 BOOST_AUTO_TEST_SUITE(Search_tests)
+
+BOOST_AUTO_TEST_CASE(First_search){
+
+    int file_size = 1000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ifstream input_file("../bin/first_test.txt");
+    T_key elem = 0;
+    int number_of_elems_less = 0, min = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    for (int i = 0; i < file_size; i++){
+
+        min = test_tree.get_last_elem(i + 1);
+        number_of_elems_less = test_tree.number_of_elems_less_than(i);
+
+        if (min != i){
+
+            error = set_byte(error, get_last_elem_error);
+        }
+
+        if (number_of_elems_less != i){
+
+            error = set_byte(error, min_number_error);
+        }
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(Second_search){
+
+    int file_size = 10000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ifstream input_file("../bin/second_test.txt");
+    T_key elem = 0;
+    int number_of_elems_less = 0, min = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    for (int i = 0; i < file_size; i++){
+
+        min = test_tree.get_last_elem(i + 1);
+        number_of_elems_less = test_tree.number_of_elems_less_than(i);
+
+        if (min != i){
+
+            error = set_byte(error, get_last_elem_error);
+        }
+
+        if (number_of_elems_less != i){
+
+            error = set_byte(error, min_number_error);
+        }
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(Fifth_search){
+
+    int file_size = 500000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ifstream input_file("../bin/fifth_test.txt");
+    T_key elem = 0;
+    int number_of_elems_less = 0, min = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    for (int i = 0; i < file_size; i++){
+
+        min = test_tree.get_last_elem(i + 1);
+        number_of_elems_less = test_tree.number_of_elems_less_than(i);
+
+        if (min != i){
+
+            error = set_byte(error, get_last_elem_error);
+        }
+
+        if (number_of_elems_less != i){
+
+            error = set_byte(error, min_number_error);
+        }
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(Eternity_search){
+
+    int file_size = 5000000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ifstream input_file("../bin/eternity_test.txt");
+    T_key elem = 0;
+    int number_of_elems_less = 0, min = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    for (int i = 0; i < file_size; i++){
+
+        min = test_tree.get_last_elem(i + 1);
+        number_of_elems_less = test_tree.number_of_elems_less_than(i);
+
+        if (min != i){
+
+            error = set_byte(error, get_last_elem_error);
+        }
+
+        if (number_of_elems_less != i){
+
+            error = set_byte(error, min_number_error);
+        }
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

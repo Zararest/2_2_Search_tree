@@ -459,6 +459,59 @@ BOOST_AUTO_TEST_CASE(Almost_eternity){
     BOOST_REQUIRE_EQUAL(error, 0);
 }
 
+BOOST_AUTO_TEST_CASE(Copy){
+
+    int file_size = 500000;
+
+    char error = 0;
+    AVL_test test_tree;
+    std::ofstream outp_file("../bin/copy_out.txt", std::ios_base::trunc);
+    std::ifstream input_file("../bin/fifth_test.txt");
+    T_key elem = 0, prev_elem = 0;
+    int number_of_elems = 0;
+
+    for (int i = 0; i < file_size; i++){
+
+        input_file >> elem;
+        test_tree.add_new_elem(elem);
+    }
+
+    if (test_tree.check_context(outp_file) == false){
+
+        error = set_byte(error, context_error);
+    }
+
+    AVL_test test_copied_tree(test_tree);
+    number_of_elems = test_copied_tree.test_dump(outp_file);
+    outp_file.close();
+    input_file.close();
+
+    input_file.open("copy_out.txt", std::ios_base::in);
+    input_file >> prev_elem;
+
+    for (int i = 0; i < number_of_elems - 1; i++){
+
+        input_file >> elem;
+
+        if (prev_elem >= elem){
+
+            error = set_byte(error, data_error);
+        }
+    }
+
+    if (number_of_elems != file_size){
+
+        error = set_byte(error, number_of_elems_error);
+    }
+
+    if (test_copied_tree.check_connections() == false){
+        
+        error = set_byte(error, connection_error);
+    }
+
+    BOOST_REQUIRE_EQUAL(error, 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 

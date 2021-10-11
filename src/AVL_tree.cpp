@@ -1,5 +1,11 @@
 #include "headers/AVL_tree.hpp"
 
+typedef struct Coordinates_struct{
+
+    int x;
+    int y;
+} Coordinates;
+
 int max(int fir_num, int sec_num){
 
     if (fir_num > sec_num){
@@ -258,6 +264,114 @@ AVL_tree::AVL_tree(){
     root = nullptr;
 
     number_of_rotations = 0;
+}
+
+bool go_to_node(int x, Node*& cur_node, Coordinates& cur_node_coord, int vertical_size){
+
+    bool node_has_found = false;
+
+    if (cur_node_coord.x == x){
+
+        node_has_found = true;
+        return true;
+    }
+
+    while (!node_has_found){
+
+        if (x < cur_node_coord.x){
+
+            if (cur_node_coord.x - x >= pow(2, vertical_size - cur_node_coord.y - 1)){
+
+                if (cur_node->go_back() == nullptr){
+
+                    return false;
+                }
+
+                if (cur_node->go_back()->go_left() == cur_node){
+
+                    cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 1);
+                } else{
+
+                    cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 1);
+                }
+
+                cur_node = cur_node->go_back();
+                cur_node_coord.y--;
+            } else{
+
+                if (cur_node->go_right() == nullptr){
+
+                    return false;
+                }
+                cur_node = cur_node->go_right();
+                cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 2);
+                cur_node_coord.y++;
+            }
+        } else{
+
+            if (x - cur_node_coord.x >= pow(2, vertical_size - cur_node_coord.y - 1)){
+
+                if (cur_node->go_back() == nullptr){
+
+                    return false;
+                }
+
+                if (cur_node->go_back()->go_left() == cur_node){
+
+                    cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 1);
+                } else{
+
+                    cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 1);
+                }
+                cur_node = cur_node->go_back();
+                cur_node_coord.y--;
+            } else{
+
+                if (cur_node->go_left() == nullptr){
+
+                    return false;
+                }
+                cur_node = cur_node->go_left();
+                cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 2);
+                cur_node_coord.y++;
+            }
+        }
+
+        if (cur_node_coord.x == x){
+
+            node_has_found = true;
+        }
+    }
+
+    return true;
+}
+
+AVL_tree::AVL_tree(const AVL_tree& old_tree){
+
+    root = nullptr;
+    number_of_rotations = 0;
+
+    Node* cur_node = old_tree.root;
+    Coordinates cur_node_coord{0, 0};
+    int  vertical_tree_size = max(old_tree.root->get_left_depth(), old_tree.root->get_right_depth()) + 1, horizontal_tree_size = pow(2, vertical_tree_size) - 1, depth = 0;
+
+    if (old_tree.root != nullptr){
+
+        while(cur_node->go_right() != nullptr){
+
+            cur_node = cur_node->go_right();
+            depth++;
+        }
+        cur_node_coord.y = depth;
+
+        for (int x = 0; x < horizontal_tree_size; x++){
+
+            if (go_to_node(x, cur_node, cur_node_coord, vertical_tree_size)){
+
+                add_new_elem(cur_node->get_key());
+            }
+        }
+    }
 }
 
 AVL_tree::~AVL_tree(){

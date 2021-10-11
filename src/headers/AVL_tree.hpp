@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <math.h>
 
 typedef int T_key;
 
@@ -82,6 +83,16 @@ public:
         return size_of_right_tree;
     }
 
+    int get_left_depth() const{
+
+        return depth_of_left;
+    }
+
+    int get_right_depth() const{
+
+        return depth_of_right;
+    }
+
     T_key get_key() const{
 
         return node_key;
@@ -146,6 +157,8 @@ protected:
 public:
 
     AVL_tree();
+
+    AVL_tree(const AVL_tree& old_tree);
 
     ~AVL_tree();
 

@@ -7,9 +7,7 @@ int main(){
     char key = '!';
     AVL_tree new_tree;
 
-    std::cin >> number_of_itter;
-
-    for (int i = 0; i < number_of_itter; i++){
+    while(!std::cin.eof()){
 
         std::cin >> key;
         std::cin >> elem;

@@ -589,6 +589,11 @@ T_key AVL_tree::get_last_elem(int degree_of_last_elem) const{
         return -1;
     }
 
+    if (degree_of_last_elem < 1){
+
+        return -1;
+    }
+
     if (degree_of_last_elem > root->get_left_tree_size() + root->get_right_tree_size() + 1){
 
         return -1;

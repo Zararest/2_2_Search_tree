@@ -2,13 +2,13 @@
 
 int main(){
 
-    int number_of_itter = 0;
     T_key elem = 0;
     char key = '!';
     AVL_tree new_tree;
 
     while(!std::cin.eof()){
 
+        key = '!';
         std::cin >> key;
         std::cin >> elem;
         

@@ -134,6 +134,23 @@ bool AVL_test::check_context(std::ostream& outp_stream) const{
 }
 
 
+bool cmp_files(std::ifstream& fir_file, std::ifstream& sec_file){
+
+    int fir_elem = 0, sec_elem = 0;
+
+    while ((!fir_file.eof()) && (!sec_file.eof())){
+
+        fir_file >> fir_elem;
+        sec_file >> sec_elem;
+
+        if (fir_elem != sec_elem){
+
+            return false;
+        }    
+    }
+
+    return true;
+}
 enum Test_errors{
 
     context_error = 1,
@@ -655,6 +672,114 @@ BOOST_AUTO_TEST_CASE(Eternity_search){
     }
 
     BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(Program_test_first){
+    //400 элементов в дереве
+    T_key elem = 0;
+    char key = '!';
+    AVL_tree new_tree;
+    std::ifstream data("../bin/input_tests/first_test.txt");
+    std::ofstream prog_out("../bin/input_tests/first_test_prog_out.txt");
+
+    while(!data.eof()){
+
+        key = '!';
+        data >> key;
+        data >> elem;
+        
+        switch (key){
+
+        case 'k':
+            new_tree.add_new_elem(elem);
+            break;
+        case 'm':
+            prog_out << new_tree.get_last_elem(elem) << ' ';
+            break;
+        
+        case 'n':
+            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
+            break;
+        }
+    }
+    prog_out << '\n';
+    prog_out.close();
+
+    std::ifstream prog_outp("../bin/input_tests/first_test_prog_out.txt"), real_outp("../bin/input_tests/first_test_out.txt");
+
+    BOOST_REQUIRE_EQUAL(cmp_files(prog_outp, real_outp), true);
+}
+
+BOOST_AUTO_TEST_CASE(Program_test_second){
+    //100000 элементов в дереве
+    T_key elem = 0;
+    char key = '!';
+    AVL_tree new_tree;
+    std::ifstream data("../bin/input_tests/second_test.txt");
+    std::ofstream prog_out("../bin/input_tests/second_test_prog_out.txt");
+
+    while(!data.eof()){
+
+        key = '!';
+        data >> key;
+        data >> elem;
+        
+        switch (key){
+
+        case 'k':
+            new_tree.add_new_elem(elem);
+            break;
+        case 'm':
+            prog_out << new_tree.get_last_elem(elem) << ' ';
+            break;
+        
+        case 'n':
+            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
+            break;
+        }
+    }
+    prog_out << '\n';
+    prog_out.close();
+
+    std::ifstream prog_outp("../bin/input_tests/second_test_prog_out.txt"), real_outp("../bin/input_tests/second_test_out.txt");
+    
+    BOOST_REQUIRE_EQUAL(cmp_files(prog_outp, real_outp), true);
+}
+
+BOOST_AUTO_TEST_CASE(Program_test_third){
+    //500000 элементов в дереве
+    T_key elem = 0;
+    char key = '!';
+    AVL_tree new_tree;
+    std::ifstream data("../bin/input_tests/third_test.txt");
+    std::ofstream prog_out("../bin/input_tests/third_test_prog_out.txt");
+
+    while(!data.eof()){
+
+        key = '!';
+        data >> key;
+        data >> elem;
+        
+        switch (key){
+
+        case 'k':
+            new_tree.add_new_elem(elem);
+            break;
+        case 'm':
+            prog_out << new_tree.get_last_elem(elem) << ' ';
+            break;
+        
+        case 'n':
+            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
+            break;
+        }
+    }
+    prog_out << '\n';
+    prog_out.close();
+
+    std::ifstream prog_outp("../bin/input_tests/third_test_prog_out.txt"), real_outp("../bin/input_tests/third_test_out.txt");
+
+    BOOST_REQUIRE_EQUAL(cmp_files(prog_outp, real_outp), true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

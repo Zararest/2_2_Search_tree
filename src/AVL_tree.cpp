@@ -6,37 +6,9 @@ typedef struct Coordinates_struct{
     int y;
 } Coordinates;
 
-int max(int fir_num, int sec_num){
+Node::Node(T_key new_key, Node* prev_node): node_key(new_key), prev(prev_node){}
 
-    if (fir_num > sec_num){
-
-        return fir_num;
-    } else{
-
-        return sec_num;
-    }
-}
-
-Node::Node(T_key new_key, Node* prev_node): node_key(new_key), prev(prev_node){
-
-    left = nullptr;
-    right = nullptr;
-
-    size_of_left_tree = 0;
-    size_of_right_tree = 0;
-
-    depth_of_left = 0;
-    depth_of_right = 0;
-
-    node_error = OK;
-}
-
-Node::~Node(){
-
-    prev = nullptr; //дополнительная проверка поскольку есть вероятность обращения по указателю на мертвого попугая
-    left = nullptr;
-    right = nullptr;
-}
+Node::~Node(){}
 
 bool Node::check_balance() const{
 
@@ -81,7 +53,7 @@ bool Node::check_data(){
 
     if (left != nullptr){
 
-        if (depth_of_left - 1 != max(left->depth_of_left, left->depth_of_right)){
+        if (depth_of_left - 1 != std::max(left->depth_of_left, left->depth_of_right)){
 
             node_error = left_depth;
             return false;
@@ -109,7 +81,7 @@ bool Node::check_data(){
 
     if (right != nullptr){
 
-        if (depth_of_right - 1 != max(right->depth_of_right, right->depth_of_left)){
+        if (depth_of_right - 1 != std::max(right->depth_of_right, right->depth_of_left)){
 
             node_error = right_depth;
             return false;
@@ -227,13 +199,13 @@ void Node::fix_node_data(){
 
     if (left != nullptr){
 
-        depth_of_left = max(left->depth_of_left, left->depth_of_right) + 1;
+        depth_of_left = std::max(left->depth_of_left, left->depth_of_right) + 1;
         size_of_left_tree = left->size_of_left_tree + left->size_of_right_tree + 1;
     }
 
     if (right != nullptr){
 
-        depth_of_right = max(right->depth_of_left, right->depth_of_right) + 1;
+        depth_of_right = std::max(right->depth_of_left, right->depth_of_right) + 1;
         size_of_right_tree = right->size_of_left_tree + right->size_of_right_tree + 1;
     }
 }
@@ -259,12 +231,7 @@ void Node::add_right_node(T_key new_key){
 }
 
 
-AVL_tree::AVL_tree(){
-
-    root = nullptr;
-
-    number_of_rotations = 0;
-}
+AVL_tree::AVL_tree(){}
 
 bool go_to_node(int x, Node*& cur_node, Coordinates& cur_node_coord, int vertical_size){
 
@@ -348,12 +315,10 @@ bool go_to_node(int x, Node*& cur_node, Coordinates& cur_node_coord, int vertica
 
 AVL_tree::AVL_tree(const AVL_tree& old_tree){
 
-    root = nullptr;
-    number_of_rotations = 0;
-
     Node* cur_node = old_tree.root;
     Coordinates cur_node_coord{0, 0};
-    int  vertical_tree_size = max(old_tree.root->get_left_depth(), old_tree.root->get_right_depth()) + 1, horizontal_tree_size = pow(2, vertical_tree_size) - 1, depth = 0;
+    int  vertical_tree_size = std::max(old_tree.root->get_left_depth(), old_tree.root->get_right_depth()) + 1;
+    int horizontal_tree_size = pow(2, vertical_tree_size), depth = 0;
 
     if (old_tree.root != nullptr){
 
@@ -404,8 +369,20 @@ AVL_tree::~AVL_tree(){
                 }
             }
         }
-        root->~Node();
+        delete root;
     }
+}
+
+bool AVL_tree::check_add_new_elem_condition(T_key new_key){
+
+    if (find_elem(new_key)){
+
+        std::cerr << "Error: This element already exists in the tree. Can't add new element[m " << new_key << "]\n";
+        error_occurred = true;
+        return false;
+    }
+
+    return true;
 }
 
 long AVL_tree::add_new_elem(T_key new_key){
@@ -413,6 +390,11 @@ long AVL_tree::add_new_elem(T_key new_key){
     if (root == nullptr){
 
         root = new Node(new_key);
+        return 0;
+    }
+
+    if (find_elem(new_key) == true){
+
         return 0;
     }
 
@@ -578,27 +560,43 @@ int AVL_tree::number_of_elems_less_than(int cur_elem) const{
     return elems_less_then;
 }
 
-T_key AVL_tree::get_last_elem(int degree_of_last_elem) const{
+bool AVL_tree::check_get_last_elem_condition(int degree_of_last_elem){
+
+    if (root == nullptr){
+
+        std::cerr << "Error: Tree is empty. Can't find last element[m " << degree_of_last_elem << "]\n";
+        error_occurred = true;
+        return false;
+    }
+
+    if (degree_of_last_elem < 1){
+
+        std::cerr << "Error: Degree of the last element less is than 1. Can't find last element[m " << degree_of_last_elem << "]\n";
+        error_occurred = true;
+        return false;
+    }
+
+    if (degree_of_last_elem > root->get_left_tree_size() + root->get_right_tree_size() + 1){
+
+        std::cerr << "Error: Degree of the last element is more than tree size. Can't find last element[m " << degree_of_last_elem << "]\n";
+        error_occurred = true;
+        return false;
+    }
+
+    return true;
+}
+
+T_key AVL_tree::get_last_elem(int degree_of_last_elem){
 
     bool elem_has_found = false;
     int elems_less_than_cur_node = 0;
     Node* cur_node = root;
 
-    if (root == nullptr){
+    if (check_get_last_elem_condition(degree_of_last_elem) == false){
 
         return -1;
     }
-
-    if (degree_of_last_elem < 1){
-
-        return -1;
-    }
-
-    if (degree_of_last_elem > root->get_left_tree_size() + root->get_right_tree_size() + 1){
-
-        return -1;
-    }
-
+    
     while (!elem_has_found){
 
         if (cur_node == nullptr){
@@ -625,4 +623,16 @@ T_key AVL_tree::get_last_elem(int degree_of_last_elem) const{
     }
     
     return cur_node->get_key();
+}
+
+bool AVL_tree::check_error(){
+
+    if (error_occurred){
+
+        error_occurred = false;
+        return false;
+    } else{
+
+        return true;
+    }
 }

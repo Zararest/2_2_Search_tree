@@ -29,18 +29,18 @@ class Node{
 private:
 
     Node* prev;
-    Node* left;
-    Node* right;
+    Node* left = nullptr;
+    Node* right = nullptr;
 
     T_key node_key;
 
-    int size_of_left_tree;
-    int size_of_right_tree;
+    int size_of_left_tree = 0;
+    int size_of_right_tree = 0;
 
-    int depth_of_left;
-    int depth_of_right;
+    int depth_of_left = 0;
+    int depth_of_right = 0;
 
-    int node_error;
+    int node_error = OK;
 
 public:
 
@@ -115,13 +115,13 @@ public:
 
     void delete_right(){
 
-        right->~Node();
+        delete right;
         right = nullptr;
     }
 
     void delete_left(){
 
-        left->~Node();
+        delete left;
         left = nullptr;
     }
 
@@ -146,14 +146,13 @@ class AVL_tree{
 
 protected:
 
-    Node* root;
-
-    long number_of_rotations;
+    Node* root = nullptr;
+    bool error_occurred = false;
+    long number_of_rotations = 0;
 
     void balance_tree(Node* cur_tree_root);
-
     Node* find_elems_node(T_key elem) const;
-    
+
 public:
 
     AVL_tree();
@@ -162,13 +161,19 @@ public:
 
     ~AVL_tree();
 
+    bool check_add_new_elem_condition(T_key new_key);
+
     long add_new_elem(T_key new_key);
 
     bool find_elem(T_key elem) const;
 
-    T_key get_last_elem(int degree_of_last_elem) const; 
+    T_key get_last_elem(int degree_of_last_elem);
+
+    bool check_get_last_elem_condition(int degree_of_last_elem);
 
     int number_of_elems_less_than(int cur_elem) const;
     
     void dump(std::ostream& outp_stream = std::cout) const;    
+
+    bool check_error();
 };

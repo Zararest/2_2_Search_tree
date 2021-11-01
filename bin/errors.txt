@@ -1,0 +1,7 @@
+Error: Tree is empty. Can't find last element[m 74]
+Error: Tree is empty. Can't find last element[m 84]
+Error: Degree of the last element is more than tree size. Can't find last element[m 85]
+Error: Degree of the last element is more than tree size. Can't find last element[m 78]
+Error: Degree of the last element is more than tree size. Can't find last element[m 44]
+Error: Degree of the last element is more than tree size. Can't find last element[m 33]
+Error: Degree of the last element is more than tree size. Can't find last element[m 36]

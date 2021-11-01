@@ -1,8 +1,15 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #define BOOST_TEST_MODULE First_TestSuite
 #include <boost/test/included/unit_test.hpp>
 #include "headers/AVL_tree.hpp"
 
-#define MAX_LEN 100
+#define CLASS_TESTS_PATH  "../bin/class_tests/"
+#define INPUT_TESTS_PATH  "../bin/input_tests/"
+#define MANUAL_TESTS_PATH "../bin/manual_tests/"
+#define MAXLEN 100
 
 char set_byte(char cur_num, int byte_num){
 
@@ -134,7 +141,7 @@ bool AVL_test::check_context(std::ostream& outp_stream) const{
 }
 
 
-bool cmp_files(std::ifstream& fir_file, std::ifstream& sec_file){
+bool cmp_numbers_in_files(std::ifstream& fir_file, std::ifstream& sec_file){
 
     int fir_elem = 0, sec_elem = 0;
 
@@ -151,6 +158,7 @@ bool cmp_files(std::ifstream& fir_file, std::ifstream& sec_file){
 
     return true;
 }
+
 enum Test_errors{
 
     context_error = 1,
@@ -164,14 +172,20 @@ enum Test_errors{
 
 BOOST_AUTO_TEST_SUITE(AVL_tree_tests)
 
-BOOST_AUTO_TEST_CASE(First){
+void AVL_tree_tests_test_body(const char* file_name, int file_size){
 
-    int file_size = 1000;
+    std::string otp_file_name(CLASS_TESTS_PATH);
+    otp_file_name.append(file_name);
+    otp_file_name.append("_out.txt");
+
+    std::string inp_file_name(CLASS_TESTS_PATH);
+    inp_file_name.append(file_name);
+    inp_file_name.append("_test.txt");
 
     char error = 0;
     AVL_test test_tree;
-    std::ofstream outp_file("../bin/first_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/first_test.txt");
+    std::ifstream input_file(inp_file_name); 
+    std::ofstream outp_file(otp_file_name, std::ios_base::trunc);
     T_key elem = 0, prev_elem = 0;
     int number_of_elems = 0;
 
@@ -190,7 +204,7 @@ BOOST_AUTO_TEST_CASE(First){
     outp_file.close();
     input_file.close();
 
-    input_file.open("first_out.txt", std::ios_base::in);
+    input_file.open(otp_file_name, std::ios_base::in);
     input_file >> prev_elem;
 
     for (int i = 0; i < number_of_elems - 1; i++){
@@ -214,266 +228,36 @@ BOOST_AUTO_TEST_CASE(First){
     }
 
     BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(First){
+
+    AVL_tree_tests_test_body("first", 1000);
 }
 
 BOOST_AUTO_TEST_CASE(Second){
 
-    int file_size = 10000;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ofstream outp_file("../bin/second_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/second_test.txt");
-    T_key elem = 0, prev_elem = 0;
-    int number_of_elems = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    if (test_tree.check_context(outp_file) == false){
-
-        error = set_byte(error, context_error);
-    }
-
-    number_of_elems = test_tree.test_dump(outp_file);
-    outp_file.close();
-    input_file.close();
-
-    input_file.open("second_out.txt", std::ios_base::in);
-    input_file >> prev_elem;
-
-    for (int i = 0; i < number_of_elems - 1; i++){
-
-        input_file >> elem;
-
-        if (prev_elem >= elem){
-
-            error = set_byte(error, data_error);
-        }
-    }
-
-    if (number_of_elems != file_size){
-
-        error = set_byte(error, number_of_elems_error);
-    }
-
-    if (test_tree.check_connections() == false){
-        
-        error = set_byte(error, connection_error);
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_tree_tests_test_body("second", 10000);
 }
 
 BOOST_AUTO_TEST_CASE(Third){
 
-    int file_size = 99995;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ofstream outp_file("../bin/third_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/third_test.txt");
-    T_key elem = 0, prev_elem = 0;
-    int number_of_elems = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    if (test_tree.check_context(outp_file) == false){
-
-        error = set_byte(error, context_error);
-    }
-
-    number_of_elems = test_tree.test_dump(outp_file);
-    outp_file.close();
-    input_file.close();
-
-    input_file.open("third_out.txt", std::ios_base::in);
-    input_file >> prev_elem;
-
-    for (int i = 0; i < number_of_elems - 1; i++){
-
-        input_file >> elem;
-
-        if (prev_elem >= elem){
-
-            error = set_byte(error, data_error);
-        }
-    }
-
-    if (number_of_elems != file_size){
-
-        error = set_byte(error, number_of_elems_error);
-    }
-
-    if (test_tree.check_connections() == false){
-        
-        error = set_byte(error, connection_error);
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_tree_tests_test_body("third", 99995);
 }
 
 BOOST_AUTO_TEST_CASE(Fourth){
 
-    int file_size = 999957;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ofstream outp_file("../bin/fourth_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/fourth_test.txt");
-    T_key elem = 0, prev_elem = 0;
-    int number_of_elems = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    if (test_tree.check_context(outp_file) == false){
-
-        error = set_byte(error, context_error);
-    }
-
-    number_of_elems = test_tree.test_dump(outp_file);
-    outp_file.close();
-    input_file.close();
-
-    input_file.open("fourth_out.txt", std::ios_base::in);
-    input_file >> prev_elem;
-
-    for (int i = 0; i < number_of_elems - 1; i++){
-
-        input_file >> elem;
-
-        if (prev_elem >= elem){
-
-            error = set_byte(error, data_error);
-        }
-    }
-
-    if (number_of_elems != file_size){
-
-        error = set_byte(error, number_of_elems_error);
-    }
-
-    if (test_tree.check_connections() == false){
-        
-        error = set_byte(error, connection_error);
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_tree_tests_test_body("fourth", 999957);
 }
 
 BOOST_AUTO_TEST_CASE(Fifth){
 
-    int file_size = 500000;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ofstream outp_file("../bin/fifth_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/fifth_test.txt");
-    T_key elem = 0, prev_elem = 0;
-    int number_of_elems = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    if (test_tree.check_context(outp_file) == false){
-
-        error = set_byte(error, context_error);
-    }
-
-    number_of_elems = test_tree.test_dump(outp_file);
-    outp_file.close();
-    input_file.close();
-
-    input_file.open("fifth_out.txt", std::ios_base::in);
-    input_file >> prev_elem;
-
-    for (int i = 0; i < number_of_elems - 1; i++){
-
-        input_file >> elem;
-
-        if (prev_elem >= elem){
-
-            error = set_byte(error, data_error);
-        }
-    }
-
-    if (number_of_elems != file_size){
-
-        error = set_byte(error, number_of_elems_error);
-    }
-
-    if (test_tree.check_connections() == false){
-        
-        error = set_byte(error, connection_error);
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_tree_tests_test_body("fifth", 500000);
 }
 
 BOOST_AUTO_TEST_CASE(Almost_eternity){
 
-    int file_size = 5000000;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ofstream outp_file("../bin/eternity_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/eternity_test.txt");
-    T_key elem = 0, prev_elem = 0;
-    int number_of_elems = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    if (test_tree.check_context(outp_file) == false){
-
-        error = set_byte(error, context_error);
-    }
-
-    number_of_elems = test_tree.test_dump(outp_file);
-    outp_file.close();
-    input_file.close();
-
-    input_file.open("eternity_out.txt", std::ios_base::in);
-    input_file >> prev_elem;
-
-    for (int i = 0; i < number_of_elems - 1; i++){
-
-        input_file >> elem;
-
-        if (prev_elem >= elem){
-
-            error = set_byte(error, data_error);
-        }
-    }
-
-    if (number_of_elems != file_size){
-
-        error = set_byte(error, number_of_elems_error);
-    }
-
-    if (test_tree.check_connections() == false){
-        
-        error = set_byte(error, connection_error);
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_tree_tests_test_body("eternity", 5000000);
 }
 
 BOOST_AUTO_TEST_CASE(Copy){
@@ -482,8 +266,8 @@ BOOST_AUTO_TEST_CASE(Copy){
 
     char error = 0;
     AVL_test test_tree;
-    std::ofstream outp_file("../bin/copy_out.txt", std::ios_base::trunc);
-    std::ifstream input_file("../bin/fifth_test.txt");
+    std::ofstream outp_file("../bin/class_tests/copy_out.txt", std::ios_base::trunc);
+    std::ifstream input_file("../bin/class_tests/fifth_test.txt");
     T_key elem = 0, prev_elem = 0;
     int number_of_elems = 0;
 
@@ -503,7 +287,7 @@ BOOST_AUTO_TEST_CASE(Copy){
     outp_file.close();
     input_file.close();
 
-    input_file.open("copy_out.txt", std::ios_base::in);
+    input_file.open("../bin/class_tests/copy_out.txt", std::ios_base::in);
     input_file >> prev_elem;
 
     for (int i = 0; i < number_of_elems - 1; i++){
@@ -534,13 +318,15 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Search_tests)
 
-BOOST_AUTO_TEST_CASE(First_search){
+void AVL_search_tests_test_body(const char* file_name, int file_size){
 
-    int file_size = 1000;
+    std::string inp_file_name(CLASS_TESTS_PATH);
+    inp_file_name.append(file_name);
+    inp_file_name.append("_test.txt");
 
     char error = 0;
     AVL_test test_tree;
-    std::ifstream input_file("../bin/first_test.txt");
+    std::ifstream input_file(inp_file_name);
     T_key elem = 0;
     int number_of_elems_less = 0, min = 0;
 
@@ -567,219 +353,194 @@ BOOST_AUTO_TEST_CASE(First_search){
     }
 
     BOOST_REQUIRE_EQUAL(error, 0);
+}
+
+BOOST_AUTO_TEST_CASE(First_search){
+
+    AVL_search_tests_test_body("first", 1000);
 }
 
 BOOST_AUTO_TEST_CASE(Second_search){
 
-    int file_size = 10000;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ifstream input_file("../bin/second_test.txt");
-    T_key elem = 0;
-    int number_of_elems_less = 0, min = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    for (int i = 0; i < file_size; i++){
-
-        min = test_tree.get_last_elem(i + 1);
-        number_of_elems_less = test_tree.number_of_elems_less_than(i);
-
-        if (min != i){
-
-            error = set_byte(error, get_last_elem_error);
-        }
-
-        if (number_of_elems_less != i){
-
-            error = set_byte(error, min_number_error);
-        }
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_search_tests_test_body("second", 10000);
 }
 
 BOOST_AUTO_TEST_CASE(Fifth_search){
 
-    int file_size = 500000;
-
-    char error = 0;
-    AVL_test test_tree;
-    std::ifstream input_file("../bin/fifth_test.txt");
-    T_key elem = 0;
-    int number_of_elems_less = 0, min = 0;
-
-    for (int i = 0; i < file_size; i++){
-
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
-
-    for (int i = 0; i < file_size; i++){
-
-        min = test_tree.get_last_elem(i + 1);
-        number_of_elems_less = test_tree.number_of_elems_less_than(i);
-
-        if (min != i){
-
-            error = set_byte(error, get_last_elem_error);
-        }
-
-        if (number_of_elems_less != i){
-
-            error = set_byte(error, min_number_error);
-        }
-    }
-
-    BOOST_REQUIRE_EQUAL(error, 0);
+    AVL_search_tests_test_body("fifth", 500000);
 }
 
 BOOST_AUTO_TEST_CASE(Eternity_search){
 
     int file_size = 5000000;
 
-    char error = 0;
-    AVL_test test_tree;
-    std::ifstream input_file("../bin/eternity_test.txt");
+    AVL_search_tests_test_body("eternity", 5000000);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(Programm_tests)
+
+void AVL_programm_tests_test_body(const char* file_name){
+
+    std::string data_file_name(INPUT_TESTS_PATH);
+    data_file_name.append(file_name);
+    data_file_name.append("_test.txt");
+
+    std::string prog_out_file_name(INPUT_TESTS_PATH);
+    prog_out_file_name.append(file_name);
+    prog_out_file_name.append("_test_prog_out.txt");
+
+    std::string real_out_file_name(INPUT_TESTS_PATH);
+    real_out_file_name.append(file_name);
+    real_out_file_name.append("_test_out.txt");
+
     T_key elem = 0;
-    int number_of_elems_less = 0, min = 0;
+    char key = '!';
+    AVL_tree new_tree;
+    std::ifstream data(data_file_name);
+    std::ofstream prog_out(prog_out_file_name);
 
-    for (int i = 0; i < file_size; i++){
+    while(!data.eof()){
 
-        input_file >> elem;
-        test_tree.add_new_elem(elem);
-    }
+        key = '!';
+        data >> key;
+        data >> elem;
+        
+        switch (key){
 
-    for (int i = 0; i < file_size; i++){
-
-        min = test_tree.get_last_elem(i + 1);
-        number_of_elems_less = test_tree.number_of_elems_less_than(i);
-
-        if (min != i){
-
-            error = set_byte(error, get_last_elem_error);
+        case 'k':
+            new_tree.add_new_elem(elem);
+            break;
+        case 'm':
+            prog_out << new_tree.get_last_elem(elem) << ' ';
+            break;
+        
+        case 'n':
+            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
+            break;
         }
-
-        if (number_of_elems_less != i){
-
-            error = set_byte(error, min_number_error);
-        }
     }
+    prog_out << '\n';
+    prog_out.close();
 
-    BOOST_REQUIRE_EQUAL(error, 0);
+    std::ifstream prog_outp(prog_out_file_name), real_outp(real_out_file_name);
+
+    BOOST_REQUIRE_EQUAL(cmp_numbers_in_files(prog_outp, real_outp), true);
 }
 
 BOOST_AUTO_TEST_CASE(Program_test_first){
     //400 элементов в дереве
-    T_key elem = 0;
-    char key = '!';
-    AVL_tree new_tree;
-    std::ifstream data("../bin/input_tests/first_test.txt");
-    std::ofstream prog_out("../bin/input_tests/first_test_prog_out.txt");
-
-    while(!data.eof()){
-
-        key = '!';
-        data >> key;
-        data >> elem;
-        
-        switch (key){
-
-        case 'k':
-            new_tree.add_new_elem(elem);
-            break;
-        case 'm':
-            prog_out << new_tree.get_last_elem(elem) << ' ';
-            break;
-        
-        case 'n':
-            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
-            break;
-        }
-    }
-    prog_out << '\n';
-    prog_out.close();
-
-    std::ifstream prog_outp("../bin/input_tests/first_test_prog_out.txt"), real_outp("../bin/input_tests/first_test_out.txt");
-
-    BOOST_REQUIRE_EQUAL(cmp_files(prog_outp, real_outp), true);
+    AVL_programm_tests_test_body("first");
 }
 
 BOOST_AUTO_TEST_CASE(Program_test_second){
     //100000 элементов в дереве
-    T_key elem = 0;
-    char key = '!';
-    AVL_tree new_tree;
-    std::ifstream data("../bin/input_tests/second_test.txt");
-    std::ofstream prog_out("../bin/input_tests/second_test_prog_out.txt");
-
-    while(!data.eof()){
-
-        key = '!';
-        data >> key;
-        data >> elem;
-        
-        switch (key){
-
-        case 'k':
-            new_tree.add_new_elem(elem);
-            break;
-        case 'm':
-            prog_out << new_tree.get_last_elem(elem) << ' ';
-            break;
-        
-        case 'n':
-            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
-            break;
-        }
-    }
-    prog_out << '\n';
-    prog_out.close();
-
-    std::ifstream prog_outp("../bin/input_tests/second_test_prog_out.txt"), real_outp("../bin/input_tests/second_test_out.txt");
-    
-    BOOST_REQUIRE_EQUAL(cmp_files(prog_outp, real_outp), true);
+    AVL_programm_tests_test_body("second");
 }
 
 BOOST_AUTO_TEST_CASE(Program_test_third){
-    //500000 элементов в дереве
-    T_key elem = 0;
-    char key = '!';
-    AVL_tree new_tree;
-    std::ifstream data("../bin/input_tests/third_test.txt");
-    std::ofstream prog_out("../bin/input_tests/third_test_prog_out.txt");
+    //500000 элементов в дереве 
+    AVL_programm_tests_test_body("third");
+}
 
-    while(!data.eof()){
+BOOST_AUTO_TEST_SUITE_END()
 
-        key = '!';
-        data >> key;
-        data >> elem;
-        
-        switch (key){
 
-        case 'k':
-            new_tree.add_new_elem(elem);
-            break;
-        case 'm':
-            prog_out << new_tree.get_last_elem(elem) << ' ';
-            break;
-        
-        case 'n':
-            prog_out << new_tree.number_of_elems_less_than(elem) << ' ';
-            break;
+BOOST_AUTO_TEST_SUITE(Manual_tests)
+
+bool cmp_files(FILE* fir_file, FILE* sec_file){
+
+    char fir_str[MAXLEN], sec_str[MAXLEN];
+    int readed = fscanf(fir_file, "%s", fir_str);
+    fscanf(sec_file, "%s", sec_str);
+
+    while (readed != EOF){
+
+        if (strcmp(fir_str, sec_str) != 0){
+            return false;
         }
+        readed = fscanf(fir_file, "%s", fir_str);
+        fscanf(sec_file, "%s", sec_str);
     }
-    prog_out << '\n';
-    prog_out.close();
 
-    std::ifstream prog_outp("../bin/input_tests/third_test_prog_out.txt"), real_outp("../bin/input_tests/third_test_out.txt");
+    return true;
+}
 
-    BOOST_REQUIRE_EQUAL(cmp_files(prog_outp, real_outp), true);
+BOOST_AUTO_TEST_CASE(Manual_test_first){
+
+    struct stat buf;
+    bool files_is_equal = false;
+    if (stat("../build/Search_tree", &buf) != -1){
+
+        system("touch ../bin/manual_tests/first_test_out.txt");
+        system("touch ../bin/manual_tests/first_test_errors.txt");
+        system("../build/Search_tree < ../bin/manual_tests/first_test.txt > ../bin/manual_tests/first_test_out.txt 2> ../bin/manual_tests/first_test_errors.txt");
+        
+        FILE* prog_outp = fopen("../bin/manual_tests/first_test_out.txt", "r");
+        FILE* real_outp = fopen("../bin/manual_tests/first_test_real_out.txt", "r");
+        files_is_equal = cmp_files(prog_outp, real_outp);
+        BOOST_REQUIRE_EQUAL(files_is_equal ,true);
+    } else{
+
+        std::cerr << "Warning: First manual test cannot be run due to the fact that the main program is not built\n";
+    }
+    if (files_is_equal){
+
+        unlink("../bin/manual_tests/first_test_out.txt");
+        unlink("../bin/manual_tests/first_test_errors.txt");        
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Manual_test_second){
+
+    struct stat buf;
+    bool files_is_equal = false;
+    if (stat("../build/Search_tree", &buf) != -1){
+
+        system("touch ../bin/manual_tests/second_test_out.txt");
+        system("touch ../bin/manual_tests/second_test_errors.txt");
+        system("../build/Search_tree < ../bin/manual_tests/second_test.txt > ../bin/manual_tests/second_test_out.txt 2> ../bin/manual_tests/second_test_errors.txt");
+        
+        FILE* prog_outp = fopen("../bin/manual_tests/second_test_out.txt", "r");
+        FILE* real_outp = fopen("../bin/manual_tests/second_test_real_out.txt", "r");
+        files_is_equal = cmp_files(prog_outp, real_outp);
+        BOOST_REQUIRE_EQUAL(files_is_equal ,true);
+    } else{
+
+        std::cerr << "Warning: Second manual test cannot be run due to the fact that the main program is not built\n";
+    }
+    if (files_is_equal){
+
+        unlink("../bin/manual_tests/second_test_out.txt");
+        unlink("../bin/manual_tests/second_test_errors.txt");        
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Manual_test_third){
+
+    struct stat buf;
+    bool files_is_equal = false;
+    if (stat("../build/Search_tree", &buf) != -1){
+
+        system("touch ../bin/manual_tests/third_test_out.txt");
+        system("touch ../bin/manual_tests/third_test_errors.txt");
+        system("../build/Search_tree < ../bin/manual_tests/third_test.txt > ../bin/manual_tests/third_test_out.txt 2> ../bin/manual_tests/third_test_errors.txt");
+        
+        FILE* prog_outp = fopen("../bin/manual_tests/third_test_out.txt", "r");
+        FILE* real_outp = fopen("../bin/manual_tests/third_test_real_out.txt", "r");
+        files_is_equal = cmp_files(prog_outp, real_outp);
+        BOOST_REQUIRE_EQUAL(files_is_equal ,true);
+    } else{
+
+        std::cerr << "Warning: Third manual test cannot be run due to the fact that the main program is not built\n";
+    }
+    if (files_is_equal){
+
+        unlink("../bin/manual_tests/third_test_out.txt");
+        unlink("../bin/manual_tests/third_test_errors.txt");        
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

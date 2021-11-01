@@ -24,7 +24,7 @@ enum Node_errorrs{
     right_size = 5
 };
 
-class Node{
+class Node final{
 
 private:
 
@@ -46,7 +46,15 @@ public:
 
     Node(T_key new_key, Node* prev_node = nullptr);
 
-    ~Node();
+    Node(const Node&);
+
+    Node(Node&&) = delete;
+
+    ~Node() = default;
+
+    Node& operator =(const Node&) = delete;
+
+    Node& operator =(Node&&) = delete;
     
     bool check_balance() const;
 
@@ -135,9 +143,9 @@ public:
         size_of_right_tree++;
     }
 
-    void print_node(std::ostream& outp_stream){
+    void print_node(std::ostream& outp_stream) const{
         
-		outp_stream << node_key << " [" << depth_of_left << ", " << depth_of_right << "]" << std::endl;
+		outp_stream << node_key << " [" << depth_of_left << ", " << depth_of_right << "]\n";
 	}
 };
 
@@ -152,24 +160,29 @@ protected:
 
     void balance_tree(Node* cur_tree_root);
     Node* find_elems_node(T_key elem) const;
+    bool check_get_last_elem_condition(int degree_of_last_elem);
+    bool check_add_new_elem_condition(T_key new_key);
+    void copy_tree(const AVL_tree& old_tree, AVL_tree* cur_tree);
 
 public:
 
-    AVL_tree();
+    AVL_tree() = default;
 
     AVL_tree(const AVL_tree& old_tree);
 
-    ~AVL_tree();
+    AVL_tree(AVL_tree&& tmp_obj);
 
-    bool check_add_new_elem_condition(T_key new_key);
+    AVL_tree& operator =(const AVL_tree& old_tree);
+
+    AVL_tree& operator =(AVL_tree&& tmp_obj);
+
+    ~AVL_tree();
 
     long add_new_elem(T_key new_key);
 
     bool find_elem(T_key elem) const;
 
     T_key get_last_elem(int degree_of_last_elem);
-
-    bool check_get_last_elem_condition(int degree_of_last_elem);
 
     int number_of_elems_less_than(int cur_elem) const;
     

@@ -277,11 +277,6 @@ BOOST_AUTO_TEST_CASE(Copy){
         test_tree.add_new_elem(elem);
     }
 
-    if (test_tree.check_context(outp_file) == false){
-
-        error = set_byte(error, context_error);
-    }
-
     AVL_test test_copied_tree(test_tree);
     number_of_elems = test_copied_tree.test_dump(outp_file);
     outp_file.close();

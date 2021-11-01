@@ -8,8 +8,6 @@ typedef struct Coordinates_struct{
 
 Node::Node(T_key new_key, Node* prev_node): node_key(new_key), prev(prev_node){}
 
-Node::~Node(){}
-
 bool Node::check_balance() const{
 
     if ((depth_of_left - depth_of_right > 1) || (depth_of_left - depth_of_right < -1)){ 
@@ -231,9 +229,62 @@ void Node::add_right_node(T_key new_key){
 }
 
 
-AVL_tree::AVL_tree(){}
+bool go_to_the_left(const int x, Node*& cur_node, Coordinates& cur_node_coord, const int vertical_size){
 
-bool go_to_node(int x, Node*& cur_node, Coordinates& cur_node_coord, int vertical_size){
+    if (cur_node_coord.x - x >= pow(2, vertical_size - cur_node_coord.y - 1)){
+
+        if (cur_node->go_back() == nullptr) return false;
+        
+        if (cur_node->go_back()->go_left() == cur_node){
+
+            cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 1);
+        } else{
+
+            cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 1);
+        }
+
+        cur_node = cur_node->go_back();
+        cur_node_coord.y--;
+    } else{
+
+        if (cur_node->go_right() == nullptr) return false;
+        
+        cur_node = cur_node->go_right();
+        cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 2);
+        cur_node_coord.y++;
+    }
+
+    return true;
+}
+
+bool go_to_the_right(const int x, Node*& cur_node, Coordinates& cur_node_coord, const int vertical_size){
+
+    if (x - cur_node_coord.x >= pow(2, vertical_size - cur_node_coord.y - 1)){
+
+        if (cur_node->go_back() == nullptr) return false;
+        
+        if (cur_node->go_back()->go_left() == cur_node){
+
+            cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 1);
+        } else{
+
+            cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 1);
+        }
+        cur_node = cur_node->go_back();
+        cur_node_coord.y--;
+    } else{
+
+        if (cur_node->go_left() == nullptr) return false;
+        
+        cur_node = cur_node->go_left();
+        cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 2);
+        cur_node_coord.y++;
+    }
+
+    return true;
+}
+
+bool go_to_node(const int x, Node*& cur_node, Coordinates& cur_node_coord, const int vertical_size){
 
     bool node_has_found = false;
 
@@ -247,61 +298,10 @@ bool go_to_node(int x, Node*& cur_node, Coordinates& cur_node_coord, int vertica
 
         if (x < cur_node_coord.x){
 
-            if (cur_node_coord.x - x >= pow(2, vertical_size - cur_node_coord.y - 1)){
-
-                if (cur_node->go_back() == nullptr){
-
-                    return false;
-                }
-
-                if (cur_node->go_back()->go_left() == cur_node){
-
-                    cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 1);
-                } else{
-
-                    cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 1);
-                }
-
-                cur_node = cur_node->go_back();
-                cur_node_coord.y--;
-            } else{
-
-                if (cur_node->go_right() == nullptr){
-
-                    return false;
-                }
-                cur_node = cur_node->go_right();
-                cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 2);
-                cur_node_coord.y++;
-            }
+            if (!go_to_the_left(x, cur_node, cur_node_coord, vertical_size)) return false;
         } else{
 
-            if (x - cur_node_coord.x >= pow(2, vertical_size - cur_node_coord.y - 1)){
-
-                if (cur_node->go_back() == nullptr){
-
-                    return false;
-                }
-
-                if (cur_node->go_back()->go_left() == cur_node){
-
-                    cur_node_coord.x -= pow(2, vertical_size - cur_node_coord.y - 1);
-                } else{
-
-                    cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 1);
-                }
-                cur_node = cur_node->go_back();
-                cur_node_coord.y--;
-            } else{
-
-                if (cur_node->go_left() == nullptr){
-
-                    return false;
-                }
-                cur_node = cur_node->go_left();
-                cur_node_coord.x += pow(2, vertical_size - cur_node_coord.y - 2);
-                cur_node_coord.y++;
-            }
+            if (!go_to_the_right(x, cur_node, cur_node_coord, vertical_size)) return false;
         }
 
         if (cur_node_coord.x == x){
@@ -313,30 +313,71 @@ bool go_to_node(int x, Node*& cur_node, Coordinates& cur_node_coord, int vertica
     return true;
 }
 
-AVL_tree::AVL_tree(const AVL_tree& old_tree){
+void AVL_tree::copy_tree(const AVL_tree& old_tree, AVL_tree* cur_tree){
 
     Node* cur_node = old_tree.root;
     Coordinates cur_node_coord{0, 0};
     int  vertical_tree_size = std::max(old_tree.root->get_left_depth(), old_tree.root->get_right_depth()) + 1;
     int horizontal_tree_size = pow(2, vertical_tree_size), depth = 0;
 
-    if (old_tree.root != nullptr){
+    while(cur_node->go_right() != nullptr){
 
-        while(cur_node->go_right() != nullptr){
+        cur_node = cur_node->go_right();
+        depth++;
+    }
+    cur_node_coord.y = depth;
 
-            cur_node = cur_node->go_right();
-            depth++;
-        }
-        cur_node_coord.y = depth;
+    for (int x = 0; x < horizontal_tree_size; x++){
 
-        for (int x = 0; x < horizontal_tree_size; x++){
+        if (go_to_node(x, cur_node, cur_node_coord, vertical_tree_size)){
 
-            if (go_to_node(x, cur_node, cur_node_coord, vertical_tree_size)){
-
-                add_new_elem(cur_node->get_key());
-            }
+            cur_tree->add_new_elem(cur_node->get_key());
         }
     }
+}
+
+AVL_tree::AVL_tree(const AVL_tree& old_tree){
+
+    copy_tree(old_tree, this);
+}
+
+AVL_tree::AVL_tree(AVL_tree&& tmp_obj){
+
+    std::swap(root, tmp_obj.root);
+    error_occurred = tmp_obj.error_occurred;
+    number_of_rotations = tmp_obj.number_of_rotations;
+}
+
+AVL_tree& AVL_tree::operator =(AVL_tree&& tmp_obj){
+
+    if (this == &tmp_obj){
+
+        return *this;
+    }
+
+    std::swap(root, tmp_obj.root);
+    
+    error_occurred = tmp_obj.error_occurred;
+    number_of_rotations = tmp_obj.number_of_rotations;
+
+    return *this;
+}
+
+AVL_tree& AVL_tree::operator =(const AVL_tree& old_tree){
+
+    if (this == &old_tree){
+
+        return *this;
+    }
+
+    AVL_tree tmp_object_with_prev_data(static_cast<AVL_tree&&>(*this));
+
+    if (old_tree.root != nullptr){
+
+        copy_tree(old_tree, this);
+    }
+
+    return *this;
 }
 
 AVL_tree::~AVL_tree(){
@@ -393,10 +434,7 @@ long AVL_tree::add_new_elem(T_key new_key){
         return 0;
     }
 
-    if (find_elem(new_key) == true){
-
-        return 0;
-    }
+    if (find_elem(new_key) == true) return 0;
 
     Node* cur_node = root;
     bool elem_has_been_added = false;
@@ -496,7 +534,14 @@ void print_tree(std::ostream& outp_stream, Node* cur_node){
 void AVL_tree::dump(std::ostream& outp_stream) const{
 
     outp_stream << "root: ";
-    root->print_node(outp_stream);
+    if (root != nullptr){
+
+        root->print_node(outp_stream);
+    } else{
+
+        outp_stream << "null\n";
+    }
+    
     outp_stream << "number of rotations: " << number_of_rotations << '\n';
     print_tree(outp_stream, root);
 }

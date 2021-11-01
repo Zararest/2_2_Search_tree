@@ -46,7 +46,7 @@ public:
 
     Node(T_key new_key, Node* prev_node = nullptr);
 
-    Node(const Node&);
+    Node(const Node&) = delete;
 
     Node(Node&&) = delete;
 
